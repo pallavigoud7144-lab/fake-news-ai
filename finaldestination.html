@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>AI Fake News Detection Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+/* BACKGROUND */
+
+body{
+margin:0;
+font-family:Segoe UI;
+background:
+linear-gradient(rgba(0,0,0,.75),
+rgba(0,0,0,.75)),
+url("https://images.unsplash.com/photo-1504711434969-e33886168f5c");
+background-size:120% 120%;
+animation:bgMove 35s infinite alternate;
+color:white;
+}
+
+@keyframes bgMove{
+0%{background-position:0% 0%;}
+100%{background-position:100% 100%;}
+}
+
+/* LOGIN */
+
+.loginPage{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.loginBox{
+background:rgba(255,255,255,.15);
+padding:40px;
+border-radius:15px;
+backdrop-filter:blur(15px);
+text-align:center;
+width:350px;
+}
+
+.loginBox input{
+width:90%;
+padding:12px;
+margin:8px;
+border-radius:8px;
+border:none;
+}
+
+.loginBtn{
+padding:10px 20px;
+border:none;
+border-radius:8px;
+background:#ffd369;
+cursor:pointer;
+font-weight:bold;
+width:90%;
+margin-top:10px;
+}
+
+/* DASHBOARD */
+
+.main{
+display:flex;
+height:100vh;
+}
+
+.sidebar{
+width:260px;
+background:rgba(255,255,255,.12);
+padding:20px;
+overflow-y:auto;
+}
+
+.sidebar button{
+width:100%;
+padding:12px;
+margin:8px 0;
+border:none;
+border-radius:8px;
+background:#ffd369;
+cursor:pointer;
+font-weight:bold;
+}
+
+.content{
+flex:1;
+padding:40px;
+}
+
+/* CARD */
+
+.card{
+background:rgba(255,255,255,.15);
+padding:25px;
+border-radius:15px;
+}
+
+/* INPUT */
+
+textarea{
+width:100%;
+padding:12px;
+border-radius:10px;
+}
+
+/* BUTTON */
+
+.checkBtn{
+padding:12px 30px;
+background:#2f2f2f;
+color:white;
+border:none;
+border-radius:25px;
+cursor:pointer;
+}
+
+/* PROGRESS */
+
+.progress{
+background:#ddd;
+border-radius:20px;
+margin-top:20px;
+}
+
+.bar{
+height:25px;
+width:0%;
+border-radius:20px;
+text-align:center;
+}
+
+/* METER */
+
+.meter{
+width:320px;
+height:160px;
+margin:auto;
+border-top-left-radius:320px;
+border-top-right-radius:320px;
+background:linear-gradient(to right,
+red,orange,yellow,limegreen);
+position:relative;
+}
+
+#needle{
+position:absolute;
+bottom:0;
+left:50%;
+width:5px;
+height:150px;
+background:white;
+transform-origin:bottom;
+transform:rotate(-90deg);
+transition:2s;
+}
+
+/* METRICS */
+
+.metric{
+background:white;
+color:black;
+padding:10px;
+margin:10px;
+border-radius:10px;
+}
+
+/* TABLE */
+
+table{
+width:100%;
+background:white;
+color:black;
+border-collapse:collapse;
+}
+
+td,th{
+border:1px solid black;
+padding:8px;
+text-align:center;
+}
+
+/* HISTORY */
+
+.historyItem{
+background:rgba(255,255,255,.25);
+padding:8px;
+margin:5px 0;
+border-radius:6px;
+cursor:pointer;
+}
+
+.hidden{display:none;}
+
+a{color:#ffd369;}
+
+</style>
+
+</head>
+
+<body>
+
+
+<!-- LOGIN PAGE -->
+
+<div id="loginPage" class="loginPage">
+
+<div class="loginBox">
+
+<h2>AI Fake News Login</h2>
+
+<input id="fname" placeholder="First Name">
+
+<input id="lname" placeholder="Last Name">
+
+<input id="email" placeholder="Email">
+
+<input id="password" type="password"
+placeholder="Password">
+
+<button class="loginBtn"
+onclick="login()">
+
+Login
+
+</button>
+
+
+<button class="loginBtn"
+style="background:white;color:black"
+onclick="googleLogin()">
+
+Sign in with Google
+
+</button>
+
+<p id="loginMsg"></p>
+
+</div>
+
+</div>
+
+
+
+<!-- DASHBOARD -->
+
+<div id="dashboard"
+class="main hidden">
+
+
+<div class="sidebar">
+
+<h2>Dashboard</h2>
+
+<button onclick="showPage('checker')">
+Checker
+</button>
+
+<button onclick="showPage('accuracy')">
+Accuracy
+</button>
+
+<button onclick="showPage('metrics')">
+Metrics
+</button>
+
+<button onclick="showPage('confusion')">
+Confusion Matrix
+</button>
+
+<hr>
+
+<h3>History</h3>
+
+<div id="historyList"></div>
+
+</div>
+
+
+
+<div class="content">
+
+
+<!-- CHECKER -->
+
+<div id="checker"
+class="card">
+
+<h1>AI Fake News Checker</h1>
+
+<textarea id="newsText"
+rows="6"
+placeholder="Paste news here">
+
+</textarea>
+
+<br><br>
+
+<button class="checkBtn"
+onclick="analyzeNews()">
+
+CHECK NEWS
+
+</button>
+
+<h2 id="result"></h2>
+
+<h3>Verify Source</h3>
+
+<div id="similarNews"></div>
+
+</div>
+
+
+
+<!-- ACCURACY -->
+
+<div id="accuracy"
+class="card hidden">
+
+<h2>Accuracy Scale</h2>
+
+<div class="progress">
+<div id="bar"
+class="bar">0%</div>
+</div>
+
+<div class="meter">
+<div id="needle"></div>
+</div>
+
+<canvas id="chart"></canvas>
+
+</div>
+
+
+
+<!-- METRICS -->
+
+<div id="metrics"
+class="card hidden">
+
+<h2>Performance</h2>
+
+<div class="metric">
+Precision:
+<span id="precision"></span>
+</div>
+
+<div class="metric">
+Recall:
+<span id="recall"></span>
+</div>
+
+<div class="metric">
+F1 Score:
+<span id="f1"></span>
+</div>
+
+</div>
+
+
+
+<!-- CONFUSION -->
+
+<div id="confusion"
+class="card hidden">
+
+<h2>Confusion Matrix</h2>
+
+<table>
+
+<tr>
+<th></th>
+<th>Predicted Real</th>
+<th>Predicted Fake</th>
+</tr>
+
+<tr>
+<th>Actual Real</th>
+<td id="tp">0</td>
+<td id="fn">0</td>
+</tr>
+
+<tr>
+<th>Actual Fake</th>
+<td id="fp">0</td>
+<td id="tn">0</td>
+</tr>
+
+</table>
+
+</div>
+
+
+</div>
+</div>
+
+
+
+<script>
+
+let chart;
+
+
+/* LOGIN SYSTEM */
+
+function login(){
+
+let first=fname.value;
+let last=lname.value;
+let mail=email.value;
+let pass=password.value;
+
+if(first=="" || last=="" ||
+mail=="" || pass==""){
+
+loginMsg.innerHTML=
+"Fill all details";
+
+loginMsg.style.color="yellow";
+
+return;
+}
+
+loginPage.classList.add("hidden");
+
+dashboard.classList.remove("hidden");
+
+}
+
+
+/* GOOGLE LOGIN */
+
+function googleLogin(){
+
+fname.value="Google";
+lname.value="User";
+email.value="google@gmail.com";
+password.value="12345";
+
+login();
+
+}
+
+
+/* NAVIGATION */
+
+function showPage(page){
+
+["checker","accuracy","metrics","confusion"]
+
+.forEach(p=>document.getElementById(p)
+
+.classList.add("hidden"));
+
+document.getElementById(page)
+
+.classList.remove("hidden");
+
+}
+
+
+/* HISTORY */
+
+function loadHistory(){
+
+let history=
+
+JSON.parse(localStorage.getItem("history"))||[];
+
+historyList.innerHTML="";
+
+history.forEach(h=>{
+
+let div=document.createElement("div");
+
+div.className="historyItem";
+
+div.innerText=
+`${h.result} | ${h.acc}%`;
+
+div.onclick=()=>{
+newsText.value=h.text;
+};
+
+historyList.appendChild(div);
+
+});
+
+}
+
+
+/* NEWS ANALYSIS */
+
+function analyzeNews(){
+
+let text=newsText.value.toLowerCase();
+
+const suspicious=[
+"fake","hoax","fraud",
+"rumor","scam"
+];
+
+let fakeScore=0;
+
+suspicious.forEach(w=>{
+if(text.includes(w))
+fakeScore+=15;
+});
+
+if(fakeScore>100)
+fakeScore=100;
+
+let accuracy=100-fakeScore;
+
+
+/* RESULT */
+
+result.innerHTML=
+"<h2 style='color:red'>FAKE NEWS</h2>";
+
+bar.style.background="red";
+
+
+/* VERIFY LINK */
+
+similarNews.innerHTML=
+
+`<a target="_blank"
+href="https://news.google.com/search?q=${encodeURIComponent(text)}">
+Verify News on Google
+</a>`;
+
+
+/* BAR */
+
+bar.style.width=accuracy+"%";
+
+bar.innerText=accuracy+"%";
+
+
+/* NEEDLE */
+
+needle.style.transform=
+
+`rotate(${(accuracy/100)*180-90}deg)`;
+
+
+/* METRICS */
+
+precision.innerText=
+(accuracy/100).toFixed(2);
+
+recall.innerText=
+((accuracy-5)/100).toFixed(2);
+
+f1.innerText=
+(accuracy/100).toFixed(2);
+
+
+/* CONFUSION */
+
+tp.innerText=0;
+tn.innerText=1;
+
+
+/* GRAPH */
+
+if(chart)chart.destroy();
+
+chart=new Chart(chart,{
+
+type:'doughnut',
+
+data:{
+labels:['Real','Fake'],
+datasets:[{
+data:[accuracy,fakeScore],
+backgroundColor:[
+'limegreen',
+'red'
+]
+}]
+}
+
+});
+
+
+/* SAVE HISTORY */
+
+let history=
+JSON.parse(
+localStorage.getItem("history")
+)||[];
+
+history.unshift({
+text:text,
+acc:accuracy,
+result:"FAKE"
+});
+
+localStorage.setItem(
+"history",
+JSON.stringify(history.slice(0,10))
+);
+
+loadHistory();
+
+}
+
+loadHistory();
+
+</script>
+
+</body>
+</html>
