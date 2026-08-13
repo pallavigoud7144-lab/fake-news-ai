@@ -1,9 +1,9 @@
 AI-Based Fake News Detection using NLP
-🚀 Problem Statement
+ Problem Statement
 
 Misinformation spreads rapidly across social media platforms. The goal of this project is to build a Natural Language Processing (NLP) based classification system that identifies whether a news article is Fake or Genuine.
 
-🧠 Approach
+ Approach
 
 Data preprocessing (cleaning, stopword removal)
 
@@ -23,7 +23,7 @@ F1-Score
 
 Confusion Matrix
 
-📊 Model Performance
+ Model Performance
 
 Accuracy: 98.99%
 
@@ -35,14 +35,14 @@ F1-Score: 0.99
 
 The model performs consistently across both fake and real news classes.
 
-🔎 Features
+ Features
 
-✅ Fake / Real classification
-✅ Confidence score prediction
-✅ Suspicious keyword extraction
-✅ Performance metrics evaluation
+ Fake / Real classification
+ Confidence score prediction
+ Suspicious keyword extraction
+ Performance metrics evaluation
 
-🛠 Technologies Used
+ Technologies Used
 
 Python
 
